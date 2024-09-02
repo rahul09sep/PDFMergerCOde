@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rahul PDF Merger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #pdf-merger {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #drop-area {
+            border: 2px dashed #7c61ffc9;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: large;
+        }
+
+        #output {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+            /* Initially hide the output section */
+        }
+        h1{
+            color: blueviolet;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="pdf-merger">
+        <h1 style="text-align: center;">Rahul PDF Merger</h1>
+
+        <div id="drop-area" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+            <p>Drop PDF files here or click to select files</p>
+            <input type="file" id="file-input" accept=".pdf" multiple onchange="handleFiles(this.files)">
+        </div>
+
+        <div id="output">
+            <h2>Selected PDF Files:</h2>
+            <div id="file-list"></div>
+            <button onclick="mergePDF()">Merge PDF</button>
+            <a id="download-link" style="display: none" download="merged.pdf">Download Merged PDF</a>
+        </div>
+    </div>
+
+    <script>
+        let pdfFiles = [];
+
+        function dragOverHandler(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        }
+
+        function dropHandler(event) {
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            pdfFiles = [];
+            const fileListContainer = document.getElementById('file-list');
+            fileListContainer.innerHTML = ''; // Clear existing file list
+            for (const file of files) {
+                if (file.type === 'application/pdf') {
+                    pdfFiles.push(file);
+                    fileListContainer.innerHTML += `<p>${file.name}</p>`;
+                } else {
+                    alert(`File "${file.name}" is not a valid PDF file and will be ignored.`);
+                }
+            }
+            displayOutput();
+        }
+
+        function displayOutput() {
+            const outputSection = document.getElementById('output');
+            if (pdfFiles.length > 0) {
+                outputSection.style.display = 'block'; // Show the output section
+            } else {
+                outputSection.style.display = 'none'; // Hide the output section if no files are selected
+            }
+        }
+
+        async function mergePDF() {
+            if (pdfFiles.length < 2) {
+                alert('Select at least two PDF files to merge.');
+                return;
+            }
+
+            const formData = new FormData();
+            pdfFiles.forEach((file, index) => {
+                formData.append(`pdf${index + 1}`, file);
+            });
+
+            const response = await fetch('/merge', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                console.log("Download link URL:");
+                const blob = await response.blob();
+                console.log(blob);
+                const downloadLink = document.getElementById('download-link');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.style.display = 'block';
+                
+                console.log("Download link URL after setting:", downloadLink.href);
+            } else {
+                alert('Error merging PDF files.');
+            }
+        }
+    </script>
+
+</body>
+
+</html>
