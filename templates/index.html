@@ -35,6 +35,18 @@
         h1{
             color: blueviolet;
         }
+
+        .pdf-file-block {
+            border: 2px solid #7c61ffc9;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .pdf-file-name {
+            margin-top: 5px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -77,7 +89,11 @@
             for (const file of files) {
                 if (file.type === 'application/pdf') {
                     pdfFiles.push(file);
-                    fileListContainer.innerHTML += `<p>${file.name}</p>`;
+                    fileListContainer.innerHTML += `
+                        <div class="pdf-file-block">
+                            <div class="pdf-file-name">${file.name}</div>
+                        </div>
+                    `;
                 } else {
                     alert(`File "${file.name}" is not a valid PDF file and will be ignored.`);
                 }
@@ -123,6 +139,8 @@
                 alert('Error merging PDF files.');
             }
         }
+
+        
     </script>
 
 </body>
